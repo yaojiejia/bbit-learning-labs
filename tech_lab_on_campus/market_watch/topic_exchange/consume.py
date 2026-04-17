@@ -17,14 +17,20 @@ import sys
 
 from solution.consumer_sol import mqConsumer  # pylint: disable=import-error
 
-def main(sector: str, queueName: str) -> None:
+def main(tickers,sectors,queueName) -> None:
     
     # Implement Logic to Create Binding Key from the ticker and sector variable -  Step 2
     #
     #                       WRITE CODE HERE!!!
     #
-    
-    consumer = mqConsumer(binding_key='*.*.'+sector,exchange_name="Tech Lab Topic Exchange",queue_name=queueName)    
+
+    binding_keys = []
+    for ticker in tickers:
+        for sector in sectors:
+            binding_keys.append("*."+ticker+"."+sector)
+    print(binding_keys)
+
+    consumer = mqConsumer(binding_keys=binding_keys,exchange_name="Tech Lab Topic Exchange",queue_name=queueName)    
     consumer.startConsuming()
     
 
@@ -35,7 +41,15 @@ if __name__ == "__main__":
     #
     #                       WRITE CODE HERE!!!
     #
-    sector = sys.argv[1]
-    queue = sys.argv[2]
-
-    sys.exit(main(sector,queue))
+    num_tickers = sys.argv[1]
+    num_sectors = sys.argv[2]
+    tickers = []
+    sectors = []
+    for i in range(3,3+int(num_tickers)):
+        tickers.append(sys.argv[i])
+        print(sys.argv[i])
+    for i in range(3+int(num_tickers), 3+int(num_tickers)+int(num_sectors)):
+        sectors.append(sys.argv[i])
+        print(sys.argv[i])
+    queue = sys.argv[int(num_tickers)+int(num_sectors)-1]
+    sys.exit(main(tickers, sectors, queue))

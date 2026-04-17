@@ -4,10 +4,10 @@ from consumer_interface import mqConsumerInterface
 import json 
 
 class mqConsumer(mqConsumerInterface):
-    def __init__(self, exchange_name: str, binding_key: str, queue_name:str) -> None:
+    def __init__(self, exchange_name: str, binding_keys, queue_name:str) -> None:
         # Save parameters to class variables
         self.exchange_name = exchange_name
-        self.binding_key = binding_key
+        self.binding_keys = binding_keys
         self.queue_name = queue_name
         # Call setupRMQConnection
         self.setupRMQConnection()
@@ -30,11 +30,12 @@ class mqConsumer(mqConsumerInterface):
 
     def bindQueueToExchange(self, queueName: str) -> None:
         # Bind Binding Key to Queue on the exchange
-        self.channel.queue_bind(
-            queue=queueName,
-            routing_key=self.binding_key,
-            exchange=self.exchange_name,
-        )
+        for binding_key in self.binding_keys:
+            self.channel.queue_bind(
+                queue=queueName,
+                routing_key=binding_key,
+                exchange=self.exchange_name,
+            )
 
     def createQueue(self, queue_name: str) -> None:
         # Create Queue if not already present
