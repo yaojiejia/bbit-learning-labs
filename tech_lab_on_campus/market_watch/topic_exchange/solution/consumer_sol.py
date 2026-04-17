@@ -1,6 +1,8 @@
 import pika
 import os
 from consumer_interface import mqConsumerInterface
+import json 
+
 class mqConsumer(mqConsumerInterface):
     def __init__(self, exchange_name: str, binding_key: str, queue_name:str) -> None:
         # Save parameters to class variables
@@ -18,6 +20,10 @@ class mqConsumer(mqConsumerInterface):
         channel = connection.channel()
         self.channel = channel
         self.connection = connection
+        
+        #create queue
+        self.createQueue(self.queue_name)
+
         # Create the exchange if not already present
         exchange = channel.exchange_declare(exchange=self.exchange_name, exchange_type="topic")
 
@@ -29,21 +35,32 @@ class mqConsumer(mqConsumerInterface):
             exchange=self.exchange_name,
         )
 
-    def createQueue(self, queueName: str) -> None:
+    def createQueue(self, queue_name: str) -> None:
         # Create Queue if not already present
         self.channel.queue_declare(queue=queue_name)
         # Set-up Callback function for receiving messages
         self.channel.basic_consume(
-            queue_name, on_message_callback, auto_ack=False
+            queue_name, self.on_message_callback, auto_ack=False
         )
 
     def on_message_callback(self, channel, method_frame, header_frame, body):
         # De-Serialize JSON message object if Stock Object Sent
-        message = json.loads(JsonMessageObject)
+        message = json.loads(body)
         # Acknowledge And Print Message
         self.channel.basic_ack(method_frame.delivery_tag, False)
         print(message)
 
     def startConsuming(self) -> None:
         # Start consuming messages
+        print("Waiting for messages")
         self.channel.start_consuming()
+
+    def __del__(self) -> None:
+        # Print "Closing RMQ connection on destruction"
+        print("Closing RMQ connection on destruction")
+        # Close Channel
+
+        # Close Connection
+        
+        self.channel.close()
+        self.connection.close()
