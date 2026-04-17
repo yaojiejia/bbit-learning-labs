@@ -26,8 +26,9 @@ class mqConsumer(mqConsumerInterface):
 
         # Create the exchange if not already present
         exchange = channel.exchange_declare(exchange=self.exchange_name, exchange_type="topic")
+        self.bindQueueToExchange(self.queue_name)
 
-    def bindQueueToExchange(self, queueName: str, topic: str) -> None:
+    def bindQueueToExchange(self, queueName: str) -> None:
         # Bind Binding Key to Queue on the exchange
         self.channel.queue_bind(
             queue=queueName,
@@ -45,10 +46,10 @@ class mqConsumer(mqConsumerInterface):
 
     def on_message_callback(self, channel, method_frame, header_frame, body):
         # De-Serialize JSON message object if Stock Object Sent
-        message = json.loads(body)
+        # message = json.loads(body)
         # Acknowledge And Print Message
         self.channel.basic_ack(method_frame.delivery_tag, False)
-        print(message)
+        print(body)
 
     def startConsuming(self) -> None:
         # Start consuming messages
