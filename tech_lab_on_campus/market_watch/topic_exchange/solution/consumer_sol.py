@@ -2,10 +2,11 @@ import pika
 import os
 from consumer_interface import mqConsumerInterface
 class mqConsumer(mqConsumerInterface):
-     def __init__(self, exchange_name: str, binding_key: str) -> None:
+    def __init__(self, exchange_name: str, binding_key: str, queue_name:str) -> None:
         # Save parameters to class variables
         self.exchange_name = exchange_name
         self.binding_key = binding_key
+        self.queue_name = queue_name
         # Call setupRMQConnection
         self.setupRMQConnection()
 
@@ -22,8 +23,8 @@ class mqConsumer(mqConsumerInterface):
 
     def bindQueueToExchange(self, queueName: str, topic: str) -> None:
         # Bind Binding Key to Queue on the exchange
-        channel.queue_bind(
-            queue= queueName,
+        self.channel.queue_bind(
+            queue=queueName,
             routing_key=self.binding_key,
             exchange=self.exchange_name,
         )
